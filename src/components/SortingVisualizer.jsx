@@ -1,9 +1,20 @@
 import { useMemo, useState } from 'react'
 import bubbleSort from '../algorithms/sorting/bubbleSort'
+import selectionSort from '../algorithms/sorting/selectionSort'
+import insertionSort from '../algorithms/sorting/insertionSort'
+import mergeSort from '../algorithms/sorting/mergeSort'
+import quickSort from '../algorithms/sorting/quickSort'
 import useAnimationEngine from '../hooks/useAnimationEngine'
 import ControlPanel from './ControlPanel'
 
 const SPEED_LEVELS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5]
+const SORTING_ALGORITHMS = {
+  bubbleSort,
+  selectionSort,
+  insertionSort,
+  mergeSort,
+  quickSort,
+}
 
 function parseInputArray(input) {
   const values = input
@@ -21,10 +32,8 @@ function SortingVisualizer() {
   const [speedIndex, setSpeedIndex] = useState(9)
 
   const steps = useMemo(() => {
-    if (algorithm === 'bubbleSort') {
-      return bubbleSort(sourceArray)
-    }
-    return [{ array: sourceArray, comparing: [], swapping: [], sorted: [] }]
+    const runAlgorithm = SORTING_ALGORITHMS[algorithm] || bubbleSort
+    return runAlgorithm(sourceArray)
   }, [algorithm, sourceArray])
 
   const speedMultiplier = SPEED_LEVELS[speedIndex]
@@ -32,10 +41,10 @@ function SortingVisualizer() {
 
   const { currentFrame, isPlaying, play, pause, reset } = useAnimationEngine(steps, speed)
 
-  const currentArray = currentFrame.array || []
-  const comparing = currentFrame.comparing || []
-  const swapping = currentFrame.swapping || []
-  const sorted = currentFrame.sorted || []
+  const currentArray = Array.isArray(currentFrame) ? currentFrame : currentFrame.array || []
+  const comparing = Array.isArray(currentFrame) ? [] : currentFrame.comparing || []
+  const swapping = Array.isArray(currentFrame) ? [] : currentFrame.swapping || []
+  const sorted = Array.isArray(currentFrame) ? [] : currentFrame.sorted || []
 
   const maxValue = useMemo(() => {
     if (currentArray.length === 0) return 1
