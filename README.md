@@ -54,10 +54,10 @@ cd algorithm-visualizer
 npm install
 
 # Start the development server
-npm start
+npm run dev
 ```
 
-The app will be running at `http://localhost:3000`
+The app will be running at `http://http://localhost:5173/`
 
 ### Build for Production
 
@@ -71,8 +71,7 @@ npm run build
 
 ```
 algorithm-visualizer/
-├── public/
-│   └── index.html
+├── index.html
 ├── src/
 │   ├── algorithms/
 │   │   ├── sorting/
@@ -98,7 +97,7 @@ algorithm-visualizer/
 │   │   ├── arrayHelpers.js          # Random array generation, validation
 │   │   └── gridHelpers.js           # Grid creation, neighbor lookup
 │   ├── App.jsx
-│   └── index.js
+│   └── main.jsx
 ├── package.json
 └── README.md
 ```
