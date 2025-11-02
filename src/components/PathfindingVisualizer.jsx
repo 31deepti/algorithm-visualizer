@@ -8,24 +8,27 @@ import { createGrid, toKey } from '../utils/gridHelpers'
 
 const ROWS = 18
 const COLS = 32
-const START = { row: 8, col: 6 }
-const END = { row: 8, col: 25 }
+const DEFAULT_START = { row: 8, col: 6 }
+const DEFAULT_END = { row: 8, col: 25 }
 const PATH_ALGORITHMS = { bfs, dfs, dijkstra, aStar }
 const SPEED_LEVELS = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5]
 
 function PathfindingVisualizer() {
   const [algorithm, setAlgorithm] = useState('dijkstra')
-  const [grid, setGrid] = useState(createGrid(ROWS, COLS, START, END))
+  const [startPoint, setStartPoint] = useState(DEFAULT_START)
+  const [endPoint, setEndPoint] = useState(DEFAULT_END)
+  const [grid, setGrid] = useState(createGrid(ROWS, COLS, DEFAULT_START, DEFAULT_END))
   const [isDrawing, setIsDrawing] = useState(false)
+  const [dragMode, setDragMode] = useState(null)
   const [speedIndex, setSpeedIndex] = useState(SPEED_LEVELS.indexOf(1))
 
   const steps = useMemo(() => {
     const runAlgorithm = PATH_ALGORITHMS[algorithm] || dijkstra
-    return runAlgorithm(grid, START, END)
-  }, [algorithm, grid])
+    return runAlgorithm(grid, startPoint, endPoint)
+  }, [algorithm, grid, startPoint, endPoint])
 
   const speedMultiplier = SPEED_LEVELS[speedIndex]
-  const speed = Math.max(35, Math.round((220 / speedMultiplier) * 2))
+  const speed = Math.round((220 / (speedMultiplier * 10)))
   const { currentFrame, isPlaying, play, pause, reset } = useAnimationEngine(steps, speed)
 
   const visited = new Set(currentFrame?.visited || [])
@@ -51,6 +54,44 @@ function PathfindingVisualizer() {
         rowNodes.map((node) => (node.isStart || node.isEnd ? node : { ...node, isWall: false })),
       ),
     )
+  }
+
+  const movePoint = (type, row, col) => {
+    setGrid((prev) =>
+      prev.map((rowNodes) =>
+        rowNodes.map((node) => {
+          if (type === 'start') {
+            if (node.row === startPoint.row && node.col === startPoint.col) {
+              return { ...node, isStart: false }
+            }
+            if (node.row === row && node.col === col) {
+              return { ...node, isStart: true, isWall: false, isEnd: false }
+            }
+            return node
+          }
+
+          if (node.row === endPoint.row && node.col === endPoint.col) {
+            return { ...node, isEnd: false }
+          }
+          if (node.row === row && node.col === col) {
+            return { ...node, isEnd: true, isWall: false, isStart: false }
+          }
+          return node
+        }),
+      ),
+    )
+
+    if (type === 'start') {
+      setStartPoint({ row, col })
+      if (row === endPoint.row && col === endPoint.col) {
+        setEndPoint(startPoint)
+      }
+    } else {
+      setEndPoint({ row, col })
+      if (row === startPoint.row && col === startPoint.col) {
+        setStartPoint(endPoint)
+      }
+    }
   }
 
   return (
@@ -111,8 +152,14 @@ function PathfindingVisualizer() {
         <h2 className="panel-title">Pathfinding Visualizer</h2>
         <div
           className="grid"
-          onMouseLeave={() => setIsDrawing(false)}
-          onMouseUp={() => setIsDrawing(false)}
+          onMouseLeave={() => {
+            setIsDrawing(false)
+            setDragMode(null)
+          }}
+          onMouseUp={() => {
+            setIsDrawing(false)
+            setDragMode(null)
+          }}
         >
           {grid.flat().map((node) => {
             const key = toKey(node.row, node.col)
@@ -131,10 +178,25 @@ function PathfindingVisualizer() {
                 key={key}
                 className={className}
                 onMouseDown={() => {
+                  if (node.isStart) {
+                    setDragMode('start')
+                    return
+                  }
+                  if (node.isEnd) {
+                    setDragMode('end')
+                    return
+                  }
                   setIsDrawing(true)
                   toggleWall(node.row, node.col)
                 }}
                 onMouseEnter={() => {
+                  if (dragMode) {
+                    if ((dragMode === 'start' && node.isEnd) || (dragMode === 'end' && node.isStart)) {
+                      return
+                    }
+                    movePoint(dragMode, node.row, node.col)
+                    return
+                  }
                   if (!isDrawing) return
                   toggleWall(node.row, node.col)
                 }}

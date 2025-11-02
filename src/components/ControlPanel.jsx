@@ -1,5 +1,6 @@
 import AlgorithmSelector from './AlgorithmSelector'
 import InputPanel from './InputPanel'
+import RandomizePanel from './RandomizePanel'
 
 function ControlPanel({
   algorithm,
@@ -7,6 +8,9 @@ function ControlPanel({
   inputValue,
   onInputChange,
   onApplyInput,
+  randomLength,
+  onRandomLengthChange,
+  onRandomizeArray,
   speedMultiplier,
   speedIndex,
   maxSpeedIndex,
@@ -21,6 +25,11 @@ function ControlPanel({
       <h2 className="panel-title">Control Panel</h2>
       <AlgorithmSelector value={algorithm} onChange={onAlgorithmChange} />
       <InputPanel value={inputValue} onChange={onInputChange} onApply={onApplyInput} />
+      <RandomizePanel
+        lengthValue={randomLength}
+        onLengthChange={onRandomLengthChange}
+        onRandomize={onRandomizeArray}
+      />
 
       <div className="panel-block">
         <label className="label" htmlFor="speedRange">

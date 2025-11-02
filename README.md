@@ -13,7 +13,7 @@ An interactive web application built with **React** and **JavaScript** that visu
 
 > Sorting Visualizer — animated bar chart with color-coded comparison, swap, and sorted states.
 
-> Pathfinding Visualizer — interactive 2D grid with wall drawing, draggable start/end nodes, and animated traversal.
+> Pathfinding Visualizer — interactive 2D grid with wall drawing, playback controls, and animated traversal.
 
 ---
 
@@ -21,14 +21,17 @@ An interactive web application built with **React** and **JavaScript** that visu
 
 - 📊 **Sorting Algorithms** — Bubble Sort, Merge Sort, Quick Sort, Insertion Sort, Selection Sort
 - 🗺️ **Pathfinding Algorithms** — Dijkstra's, A\*, BFS, DFS
+- 🔀 **View Toggle** — switch between Sorting and Pathfinding from the top navigation
 - ▶️ **Real-time Step-by-Step Animation** — watch every comparison, swap, and node visit
 - ⏯️ **Pause / Resume** — stop the animation at any point and continue from where you left off
 - 🎚️ **Speed Control** — adjust animation speed from very slow to very fast using a slider
 - ✍️ **Custom Input** — enter your own array values for sorting visualization
+- 🎲 **Random Array Generator** — generate random arrays with configurable length (default 20)
 - 🧱 **Wall Drawing** — click and drag on the grid to place or remove walls
-- 🔵🔴 **Draggable Start / End Nodes** — reposition the source and destination on the pathfinding grid
-- 🔄 **Reset & Randomize** — reset to initial state or generate a new random array / grid at any time
+- 🔵🔴 **Draggable Start / End Nodes** — move source and destination points directly on the grid
+- 🔄 **Reset Controls** — reset playback and clear walls in pathfinding
 - 🏁 **Shortest Path Trace** — highlights the final optimal path after the algorithm completes
+- 🖥️ **Desktop Layout** — fixed desktop layout (no responsive/mobile mode)
 
 ---
 
@@ -57,7 +60,7 @@ npm install
 npm run dev
 ```
 
-The app will be running at `http://http://localhost:5173/`
+The app will be running at `http://localhost:5173/`
 
 ### Build for Production
 
@@ -75,27 +78,27 @@ algorithm-visualizer/
 ├── src/
 │   ├── algorithms/
 │   │   ├── sorting/
-│   │   │   ├── bubbleSort.js        # Records every comparison & swap as a step
+│   │   │   ├── bubbleSort.js
 │   │   │   ├── mergeSort.js
 │   │   │   ├── quickSort.js
 │   │   │   ├── insertionSort.js
 │   │   │   └── selectionSort.js
 │   │   └── pathfinding/
-│   │       ├── dijkstra.js          # Weighted shortest path
-│   │       ├── aStar.js             # Heuristic-based optimal path
-│   │       ├── bfs.js               # Unweighted shortest path
-│   │       └── dfs.js               # Explores as deep as possible first
+│   │       ├── dijkstra.js
+│   │       ├── aStar.js
+│   │       ├── bfs.js
+│   │       └── dfs.js
 │   ├── components/
-│   │   ├── AlgorithmSelector.jsx    # Dropdown to pick algorithm type
-│   │   ├── ControlPanel.jsx         # Play, pause, reset, speed slider
-│   │   ├── InputPanel.jsx           # Custom array input for sorting
-│   │   ├── SortingVisualizer.jsx    # Animated bar chart
-│   │   └── PathfindingVisualizer.jsx# Animated 2D grid
+│   │   ├── AlgorithmSelector.jsx
+│   │   ├── ControlPanel.jsx
+│   │   ├── InputPanel.jsx
+│   │   ├── RandomizePanel.jsx
+│   │   ├── SortingVisualizer.jsx
+│   │   └── PathfindingVisualizer.jsx
 │   ├── hooks/
-│   │   └── useAnimationEngine.js    # Core playback logic (play/pause/speed/tick)
+│   │   └── useAnimationEngine.js
 │   ├── utils/
-│   │   ├── arrayHelpers.js          # Random array generation, validation
-│   │   └── gridHelpers.js           # Grid creation, neighbor lookup
+│   │   └── gridHelpers.js
 │   ├── App.jsx
 │   └── main.jsx
 ├── package.json
@@ -128,8 +131,8 @@ Algorithm runs → collects steps[] → Animation engine replays steps[] at chos
 ### Pathfinding Visualizer
 
 - The grid is a 2D array of node objects
-- Each node tracks: `isWall`, `isVisited`, `distance`, `previousNode`, and heuristic scores
-- After the algorithm finishes, the shortest path is traced back using `previousNode` references
+- Each node tracks positional and wall state (`row`, `col`, `isWall`, `isStart`, `isEnd`)
+- Algorithms record snapshots for `visited`, `frontier`, `current`, and final `path`
 - Cell color states:
   - ⬜ Unvisited
   - 🟦 Visited
@@ -146,20 +149,22 @@ Algorithm runs → collects steps[] → Animation engine replays steps[] at chos
 
 1. Select a **sorting algorithm** from the dropdown
 2. Optionally enter a **custom array** (comma-separated numbers, e.g. `5,3,8,1,9`)
-3. Or click **Randomize** to generate a random array
-4. Adjust the **speed slider** to your preference
-5. Press **Play** to start the animation
-6. Use **Pause / Resume** at any time
-7. Press **Reset** to go back to the original array
+3. Set **random length** and click **Randomize** to generate a new array
+4. Click **Apply Input** to load manual values
+5. Adjust the **speed slider** to your preference
+6. Press **Play** to start the animation
+7. Use **Pause / Resume** at any time
+8. Press **Reset** to return to the first snapshot
 
 ### Pathfinding
 
 1. Select a **pathfinding algorithm** from the dropdown
 2. **Click and drag** on the grid to draw walls
-3. **Drag the start node** (🔵) and **end node** (🔴) to new positions
+3. **Drag the start node** (🔵) and **end node** (🔴) to reposition them
 4. Press **Play** to visualize the algorithm
 5. Watch the algorithm explore the grid, then trace the shortest path
-6. Press **Reset** to clear visited nodes (walls are kept), or **Clear All** to reset the entire grid
+6. Press **Reset** to replay from the first snapshot
+7. Press **Clear Walls** to remove all walls and keep start/end nodes
 
 ---
 

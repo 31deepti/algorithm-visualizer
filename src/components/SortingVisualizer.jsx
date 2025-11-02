@@ -15,6 +15,15 @@ const SORTING_ALGORITHMS = {
   mergeSort,
   quickSort,
 }
+const DEFAULT_ARRAY_LENGTH = 20
+
+function getRandomArray(length) {
+  return Array.from({ length }, () => Math.floor(Math.random() * 95) + 5)
+}
+
+function toInputString(values) {
+  return values.join(', ')
+}
 
 function parseInputArray(input) {
   const values = input
@@ -22,13 +31,15 @@ function parseInputArray(input) {
     .map((item) => Number(item.trim()))
     .filter((value) => Number.isFinite(value))
 
-  return values.length > 0 ? values : [5, 3, 8, 4, 2, 10, 12, 1, 5]
+  return values.length > 0 ? values : getRandomArray(DEFAULT_ARRAY_LENGTH)
 }
 
 function SortingVisualizer() {
+  const initialArray = useMemo(() => getRandomArray(DEFAULT_ARRAY_LENGTH), [])
   const [algorithm, setAlgorithm] = useState('bubbleSort')
-  const [inputValue, setInputValue] = useState('5, 3, 8, 4, 2, 10, 12, 1, 5')
-  const [sourceArray, setSourceArray] = useState([5, 3, 8, 4, 2, 10, 12, 1, 5])
+  const [inputValue, setInputValue] = useState(toInputString(initialArray))
+  const [sourceArray, setSourceArray] = useState(initialArray)
+  const [randomLength, setRandomLength] = useState(String(DEFAULT_ARRAY_LENGTH))
   const [speedIndex, setSpeedIndex] = useState(9)
 
   const steps = useMemo(() => {
@@ -37,7 +48,7 @@ function SortingVisualizer() {
   }, [algorithm, sourceArray])
 
   const speedMultiplier = SPEED_LEVELS[speedIndex]
-  const speed = Math.max(60, Math.round(450 / speedMultiplier))
+  const speed = Math.round((450 / (speedMultiplier * 20)))
 
   const { currentFrame, isPlaying, play, pause, reset } = useAnimationEngine(steps, speed)
 
@@ -54,6 +65,18 @@ function SortingVisualizer() {
   const applyInput = () => {
     const parsed = parseInputArray(inputValue)
     setSourceArray(parsed)
+    setInputValue(toInputString(parsed))
+  }
+
+  const randomizeArray = () => {
+    const parsedLength = Number(randomLength)
+    const length = Number.isFinite(parsedLength)
+      ? Math.min(120, Math.max(2, Math.floor(parsedLength)))
+      : DEFAULT_ARRAY_LENGTH
+    const randomValues = getRandomArray(length)
+    setRandomLength(String(length))
+    setSourceArray(randomValues)
+    setInputValue(toInputString(randomValues))
   }
 
   const handlePlay = () => {
@@ -68,6 +91,9 @@ function SortingVisualizer() {
         inputValue={inputValue}
         onInputChange={setInputValue}
         onApplyInput={applyInput}
+        randomLength={randomLength}
+        onRandomLengthChange={setRandomLength}
+        onRandomizeArray={randomizeArray}
         speedMultiplier={speedMultiplier}
         speedIndex={speedIndex}
         maxSpeedIndex={SPEED_LEVELS.length - 1}
